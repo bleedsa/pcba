@@ -23,8 +23,7 @@ F:.((`title;  title:  "pcba")                            / project title
     (`ar;     ar:     $[nat;"ar";"ape/bin/ar.ape"])      / obj archiver
     (`cflags; cflags: sp("-Iinc -fno-omit-frame-pointer" / cflags / nightmare
                          $[nat;"-march=native";"-mcosmo -DCOSMO"]
-                         $[rel;"-O3"
-                           sp($[nat;"-mdbg";""];"-g -O0 -DDBG")])))
+                         $[rel;"-O3";sp($[nat;"-mdbg";""];"-g -O0 -DDBG")])))
 
 / src files, paths, etc
 stem:*"."_
@@ -51,8 +50,9 @@ cc:bu@"cc";ln:bu@"ln";ar:bu@"ar"       / compile c, link, static lib
 
 / generate rules
 rules:nl(dr["cc";"$cc -c $cflags -MD -MF $out.d -o$out $in"] / c -> o
-         br["ln";"$ln $cflags -o$out $in"]                   / o -> exe
-         br["ar";"$ar rcs $out $in"])                        / o -> a
+         br["ln";"$cc $cflags -o$out $in"]                   / o -> exe
+         br["ar";"$ar rcs $out $in"]                         / o -> a
+         br["rm";"rm -rf $in"])
 
 / generate build statements based on the files on hand
 mkobj:{cc[y;,x]}                  / make a cc build statement
@@ -61,13 +61,13 @@ binbs:bins mkobj'binos:objof'bins / bin objs
 
 / generate build statements for linked code
 slib:ar[libof"$title";libos]        / link the main static lib
-exes:binos{cc[y;,x]}'es:exeof'binos / link all exes
+exes:binos{ln[y;,x]}'es:exeof'binos / link all exes
 
 / print all our generated data
-`0:nl@out:(nl@{$[x]," = ",$F x}'!F / vars from flag map
-           rules                   / rules
-           nl libbs;nl binbs       / objs
-           nl exes;slib            / link
-           "default ",(sp es)," ",(libof"$title"));
-`0:,"\n"
+"build.ninja"0:nl(nl@{$[x]," = ",$F x}'!F / vars from flag map
+                  rules                   / rules
+                  br["clean";"rm $o"]     / clean
+                  nl libbs;nl binbs       / objs
+                  nl exes;slib            / link
+                  "default ",(sp es)," ",(libof"$title"));
 \\
