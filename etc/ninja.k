@@ -60,13 +60,14 @@ libbs:libs mkobj'libos:objof'libs / lib objs
 binbs:bins mkobj'binos:objof'bins / bin objs
 
 / generate build statements for linked code
-slib:ar[libof"$title";libos]     / link the main static lib
+slib:ar[libof"$title";libos]        / link the main static lib
 exes:binos{cc[y;,x]}'es:exeof'binos / link all exes
 
 / print all our generated data
 `0:nl@out:(nl@{$[x]," = ",$F x}'!F / vars from flag map
-	          rules                   / rules
+           rules                   / rules
            nl libbs;nl binbs       / objs
            nl exes;slib            / link
-											"default ",(sp es)," ",(libof"$title"));
+           "default ",(sp es)," ",(libof"$title"));
 `0:,"\n"
+\\
